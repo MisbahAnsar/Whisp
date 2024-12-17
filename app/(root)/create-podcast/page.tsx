@@ -32,24 +32,37 @@ import { Textarea } from "@/components/ui/textarea";
 import GeneratePodcast from "@/components/GeneratePodcast";
 import GenerateThumbnail from "@/components/GenerateThumbnail";
 import { Loader } from "lucide-react";
+import { Id } from "@/convex/_generated/dataModel";
+import { podcastData } from "@/constants";
 
 const voiceCategories = ['alloy', 'shimmer', 'nova', 'echo', 'fable', 'onyx'];
 
 const formSchema = z.object({
-  username: z.string().min(2, {
-    message: "Username must be at least 2 characters.",
-  }),
+  podcastTitle: z.string().min(2),
+  podcastDescription: z.string().min(2)
 });
 
 const CreatePodcast = () => {
+  
+  const [imagePrompt, setImagePrompt] = useState('');
+  const [imageStorageId, setImageStorageId] =  useState<Id<"_storage"> | null>(null);
+  const [imageUrl, setImageUrl] = useState('');
+  
+  const [audioUrl, setAudioUrl] = useState('');
+  const [audioStorageId, setAudioStorageId] = useState<Id<"_storage"> | null>(null);
+  const [audioDuration, setAudioDuration] = useState(0);
+  
   const [voiceType, setVoiceType] = useState<string | null>(null);
+  const [voicePrompt, setVoicePrompt] = useState('');
+  
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // 1. Define your form.
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      username: "",
+      podcastTitle: "",
+      podcastDescription: "",
     },
   });
 
@@ -80,7 +93,7 @@ const CreatePodcast = () => {
                 <SelectTrigger className={cn('text-16 w-full border-none bg-black-1 text-gray-1')}>
                   <SelectValue placeholder="Select AI Voice" className="placeholder:text-gray-1" />
                 </SelectTrigger>
-                <SelectContent className="text-16 border-none bg-black-1 font-bold text-white-1 focus:ring-orange-1">
+                <SelectContent className="text-16 border-none bg-black-1 font-bold text-white-1 focus:ring-offset-orange-1">
                   {voiceCategories.map((category) => (
                     <SelectItem className="capitalize focus:bg-orange-1" value={category} key={category}>
                       {category}
@@ -107,7 +120,7 @@ const CreatePodcast = () => {
                   </FormLabel>
                   <FormControl>
                     <Textarea
-                      className="input-class focus-visible:ring-orange-1"
+                      className="input-class focus-visible:ring-offset-orange-1"
                       placeholder="Write a short description for your podcast"
                       {...field}
                     />
@@ -120,8 +133,16 @@ const CreatePodcast = () => {
 
           {/* Generate Podcast and Thumbnail */}
           <div className="flex flex-col pt-10">
-            
-              <GeneratePodcast />
+
+              <GeneratePodcast
+                setAudioStorageId={setAudioStorageId}
+                setAudio={setAudioUrl}
+                voiceType={voiceType}
+                audio={audioUrl}
+                voicePrompt={voicePrompt}
+                setVoicePrompt={setVoicePrompt}
+                setAudioDuration={setAudioDuration}
+              />
 
               <GenerateThumbnail />
 
